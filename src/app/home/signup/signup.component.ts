@@ -1,23 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { lowerCaseValidator } from 'src/app/shared/validators/lower-case.validator';
 import { UserNotTakenValidatorService } from './user-not-taken.validator.service';
 import { NewUser } from './new-user';
 import { SignUpService } from './signup.service';
 import { Router } from '@angular/router';
+import { PlatformDetectorService } from 'src/app/core/plataform/plataform-detector/platform-detector.service';
 
 @Component({
-    templateUrl: './signup.component.html'
+    templateUrl: './signup.component.html',
+    providers: [UserNotTakenValidatorService]
 })
 export class SignUpComponent implements OnInit {
 
     signupForm: FormGroup;
-
-    constructor(private formBuilder: FormBuilder, private userNotTakenValidatorService: UserNotTakenValidatorService, private signUpService: SignUpService,
-        private router: Router) {}
+    @ViewChild('inputEmail') inputEmail: ElementRef<HTMLInputElement>
+    
+    constructor(
+        private formBuilder: FormBuilder, 
+        private userNotTakenValidatorService: UserNotTakenValidatorService, 
+        private signUpService: SignUpService,
+        private router: Router,
+        private platformDetectorService: PlatformDetectorService) {}
 
     ngOnInit(): void { 
-        this.userNotTakenValidatorService.checkUserNameTaken()
+
         this.signupForm = this.formBuilder.group({
             email: ['',
                 [
@@ -49,6 +56,8 @@ export class SignUpComponent implements OnInit {
                 ]
             ]
         });
+        this.platformDetectorService.isPlatformBrowser() &&
+        this.inputEmail.nativeElement.focus();
     }
     signup() {
         const newUser = this.signupForm.getRawValue() as NewUser;
@@ -59,4 +68,4 @@ export class SignUpComponent implements OnInit {
                 err => console.log(err)
             );
     }
-}
+} 
